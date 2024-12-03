@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Code</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'><path fill='%23712cf9' d='M200 32H248C261 32 272 43 272 56s-11 24-24 24H200c-13 0-24-11-24-24s11-24 24-24zM96 160c0-26.5 21.5-48 48-48h48V56c0-13.3 10.7-24 24-24s24 10.7 24 24v56h48c26.5 0 48 21.5 48 48v48h56c13.3 0 24 10.7 24 24s-10.7 24-24 24H336v48c0 26.5-21.5 48-48 48H240v56c0 13.3-10.7 24-24 24s-24-10.7-24-24V352H144c-26.5 0-48-21.5-48-48V256H40c-13.3 0-24-10.7-24-24s10.7-24 24-24H96V160z'/></svg>"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .code-display {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+            position: relative;
+        }
+        .error-message {
+            color: #dc3545;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        .warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .copy-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        .game-name-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .game-name {
+            color: #333;
+            font-size: 1.8em;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Code</h1>
+        {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+        {% elif code %}
+            <div class="warning">
+                This code will only be shown once. Please save it now!
+            </div>
+            {% if game_name %}
+                <div class="game-name-container">
+                    <h2 class="game-name">{{ game_name }}</h2>
+                </div>
+            {% endif %}
+            <div class="code-display">
+                {{ code }}
+                <button class="copy-button" onclick="copyCodeToClipboard()">
+                    <i class="fas fa-copy"></i>
+                </button>
+                
+                <script>
+                    function copyCodeToClipboard() {
+                        const textArea = document.createElement('textarea');
+                        const code = document.querySelector('.code-display').textContent;
+                        textArea.value = code;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                           
+                        } catch (err) {
+                            console.error('Error copying code:', err);
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                </script>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a href="https://store.steampowered.com/account/registerkey" target="_blank" 
+                   class="btn btn-outline-dark btn-sm d-flex align-items-center px-4 py-2" style="padding-right: 2em;">
+                    <i class="fab fa-steam fa-lg me-3"></i> Activate on Steam        
+                </a>  
+                <a href="https://www.gog.com/redeem/{{code}}" target="_blank" 
+                   class="btn btn-outline-dark btn-sm d-flex align-items-center px-4 py-2">
+                    <i class="fas fa-gamepad fa-lg me-3"></i> Activate on GOG
+                </a>
+                </div>
+        {% endif %}
+    </div>
+</body>
+</html>

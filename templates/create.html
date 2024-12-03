@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Game Codes</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'><path fill='%23712cf9' d='M200 32H248C261 32 272 43 272 56s-11 24-24 24H200c-13 0-24-11-24-24s11-24 24-24zM96 160c0-26.5 21.5-48 48-48h48V56c0-13.3 10.7-24 24-24s24 10.7 24 24v56h48c26.5 0 48 21.5 48 48v48h56c13.3 0 24 10.7 24 24s-10.7 24-24 24H336v48c0 26.5-21.5 48-48 48H240v56c0 13.3-10.7 24-24 24s-24-10.7-24-24V352H144c-26.5 0-48-21.5-48-48V256H40c-13.3 0-24-10.7-24-24s10.7-24 24-24H96V160z'/></svg>"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .code-form {
+            margin: 20px 0;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 300px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        #gameNameInput {
+            margin-bottom: 15px;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+        .share-url {
+            word-break: break-all;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
+            display: none;
+        }
+        #loading {
+            display: none;
+            margin: 10px 0;
+            color: #6c757d;
+        }
+        .copy-button {
+            margin-top: 10px;
+            background-color: #28a745;
+        }
+        .copy-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Game Code</h1>
+        <div class="code-form">
+            <div class="input-group">
+                <input type="text" id="gameNameInput" placeholder="Enter game name">
+            </div>
+            <div class="input-group">
+                <input type="text" id="codeInput" placeholder="Enter game code">
+            </div>
+            <button id="createBtn" class="button">Create Share Link</button>
+            <div id="loading">Creating share link...</div>
+        </div>
+        <div id="result" class="result">
+            <h3>Share Link Created!</h3>
+            <p>Share this URL with someone to let them claim the code:</p>
+            <div id="shareUrl" class="share-url"></div>
+            <button id="copyBtn" class="button copy-button">Copy Link</button>
+            <button id="copyBtn2" class="button copy-button">Copy Link with game name</button>
+        </div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        document.getElementById('createBtn').addEventListener('click', async () => {
+            const gameNameInput = document.getElementById('gameNameInput');
+            const codeInput = document.getElementById('codeInput');
+            const gameName = gameNameInput.value.trim();
+            const code = codeInput.value.trim();
+
+            // Validate inputs
+            if (!gameName) {
+                document.getElementById('error').textContent = 'Please enter a game name';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            if (!code) {
+                document.getElementById('error').textContent = 'Please enter a game code';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+
+            // Clear previous errors
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/add_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        game_name: gameName  // Include game name in the request
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('shareUrl').textContent = data.share_url;
+                } else {
+                    throw new Error(data.message || 'Failed to create share link');
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').textContent = error.message;
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const shareUrl = document.getElementById('shareUrl').textContent;
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                const copyBtn = document.getElementById('copyBtn');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Link';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+        document.getElementById('copyBtn2').addEventListener('click', async () => {
+            const shareUrl = document.getElementById('shareUrl').textContent;
+            const gameNameInput = document.getElementById('gameNameInput');
+            const gameName = gameNameInput.value.trim();
+            try {
+                await navigator.clipboard.writeText(`${gameName} : ${shareUrl}`);
+                const copyBtn = document.getElementById('copyBtn');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Link';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+    </script>
+</body>
+</html>
